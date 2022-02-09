@@ -19,7 +19,7 @@ void print(const char* format, const Args& ... args) {
 
 /// Same as fmt::print, but adds new line character
 template <typename... Args>
-void print(const fmt::v6::text_style& ts, const char* format, const Args& ... args) {
+void print(const fmt::v8::text_style& ts, const char* format, const Args& ... args) {
     fmt::print(ts, format, args...);
     fmt::print("\n");
 }

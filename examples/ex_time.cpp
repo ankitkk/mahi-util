@@ -14,6 +14,8 @@
 //
 // Author(s): Evan Pezent (epezent@rice.edu)
 
+#include <fmt/chrono.h>
+#include <fmt/ostream.h>
 #include <Mahi/Util.hpp>
 #include <iostream>
 

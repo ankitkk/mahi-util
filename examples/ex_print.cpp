@@ -1,3 +1,4 @@
+#include <fmt/ranges.h>
 #include <Mahi/Util.hpp>
 #include <vector>
 #include <string>
@@ -19,7 +20,7 @@ int main(int argc, char const *argv[])
     print("Hello, my name is {1} and I am {0} years old.", 28, "Evan");
     print("Hello, my name is {name} and I am {age} years old.", "name"_a="Evan", "age"_a=28);
     std::vector<std::string> choices = {"apple", "pear", "banana"};
-    print("Your can choose {}!", fmt::join(choices, " or "));
+    fmt::print("Your can choose {}!", fmt::join(choices, " or "));
 
     // text styling (You may need to call enable_virtual_console(), see above)
     print(fg(fmt::color::chartreuse), "foreground=chartreuse");

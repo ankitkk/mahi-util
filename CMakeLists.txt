@@ -54,7 +54,9 @@ endif()
 set(JSON_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/json/include)
 
 # FMT
-add_subdirectory(3rdparty/fmt)
+include(FetchContent)
+FetchContent_Declare(fmt GIT_REPOSITORY https://github.com/fmtlib/fmt.git GIT_TAG b6f4ceaed0a0a24ccf575fab6c56dd50ccf6f1a9)
+FetchContent_MakeAvailable(fmt)
 install(TARGETS fmt EXPORT mahi-util-targets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 # CXXOPTS
@@ -63,12 +65,10 @@ set(CXXOPTS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/cxxopts/include)
 #===============================================================================
 # CREATE LIBRARY
 #===============================================================================
-
 add_library(util "")
 add_library(mahi::util ALIAS util)
 set_target_properties(util PROPERTIES DEBUG_POSTFIX -d)
 target_compile_features(util PUBLIC cxx_std_11)
-install(TARGETS util EXPORT mahi-util-targets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 set_target_properties(util PROPERTIES OUTPUT_NAME "mahi-util")
 
 # defines
@@ -140,7 +140,7 @@ target_compile_definitions(util
         -D_CRT_SECURE_NO_WARNINGS          # remove secure warnings (e.g sprinft_s)
         -DNOMINMAX                         # remove min/max macros
         -D_WINSOCK_DEPRECATED_NO_WARNINGS  # remove winsock deprecated warnings
-) 
+)
 endif(WIN32)
 
 #===============================================================================
@@ -167,65 +167,3 @@ if(MAHI_UTIL_EXAMPLES)
     add_subdirectory(examples)
 endif()
 
-#===============================================================================
-# INSTALL
-#===============================================================================
-
-if (MSVC)
-    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(MAHI_INSTALL_POSTFIX "") # 64 bit Windows is default
-    else()
-        set(MAHI_INSTALL_POSTFIX "-x86")
-    endif()
-elseif(NI_LRT AND CMAKE_SYSTEM_PROCESSOR MATCHES ARM)
-    set(MAHI_INSTALL_POSTFIX "-nilrt-arm")
-elseif(NI_LRT AND CMAKE_SYSTEM_PROCESSOR MATCHES ARM)
-    set(MAHI_INSTALL_POSTFIX "-nilrt-x64")
-endif()
-
-set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}${MAHI_INSTALL_POSTFIX}")
-
-# install headers
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(DIRECTORY ${JSON_INCLUDE_DIR}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(DIRECTORY ${CXXOPTS_INCLUDE_DIR}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-# set where we want to install our config
-set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/mahi-util)
-
-# export the targets to a script
-install(EXPORT mahi-util-targets
-	FILE
-		mahi-util-targets.cmake
-	NAMESPACE
-		mahi::
-	DESTINATION
-		${INSTALL_CONFIGDIR}
-)
-
-# include helper functions for creating config files that can be included by other projects to find and use a package
-include(CMakePackageConfigHelpers)
-
-# generate a package configuration file and a package version file
-configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/cmake/mahi-util-config.cmake.in
-	${CMAKE_CURRENT_BINARY_DIR}/mahi-util-config.cmake
-	INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
-)
-
-write_basic_package_version_file(
-	${CMAKE_CURRENT_BINARY_DIR}/mahi-util-config-version.cmake
-	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY AnyNewerVersion
-)
-
-# install the config and configversion modules
-install(FILES
-	${CMAKE_CURRENT_BINARY_DIR}/mahi-util-config.cmake
-	${CMAKE_CURRENT_BINARY_DIR}/mahi-util-config-version.cmake
-	DESTINATION ${INSTALL_CONFIGDIR}
-)
-
-# export from the build tree
-export(EXPORT mahi-util-targets
-	   NAMESPACE mahi::
-	   FILE ${CMAKE_CURRENT_BINARY_DIR}/mahi-util-targets.cmake)
